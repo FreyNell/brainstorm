@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  iam-backend:
+    build:
+      context: ../../iam/backend
+      dockerfile: Dockerfile
+    container_name: iam-backend
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${DB_APP_USER}
+      DB_PASSWORD: ${DB_ROOT_PASSWORD}
+      DB_NAME: iam
+    networks:
+      - compose_network
+    restart: on-failure
+
+  db:
+    image: mariadb:latest
+    container_name: mariadb
+    ports:
+      - "3306:3306" # Exponiendo el puerto 3306 para la base de datos
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: iam
+      MARIADB_USER: ${DB_APP_USER}
+      MARIADB_PASSWORD: ${DB_APP_PASSWORD}
+    volumes:
+      - ../../db_data:/var/lib/mysql
+    networks:
+      - compose_network
+
+networks:
+  compose_network:
+    driver: bridge
