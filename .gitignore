@@ -34,3 +34,8 @@ go.work.sum
 # .tfstate files
 *.tfstate
 *.tfstate.*
+
+
+## OTHER
+db_data/
+secrets/
