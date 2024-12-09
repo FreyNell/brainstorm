@@ -5,7 +5,7 @@ param (
     [string]$Environment # Argumento para especificar el ambiente (dev, prod, etc.)
 )
 
-$envFile = ".\secrets\$($Environment).env"
+$envFile = "..\..\secrets\$($Environment).env"
 
 if (-Not (Test-Path $envFile)) {
     Write-Error "El archivo $envFile no existe."
@@ -32,6 +32,5 @@ Get-Content $envFile | ForEach-Object {
 
 }
 
-cd .\devops\iac
-
-docker-compose up
+docker-compose down
+docker-compose up --build
