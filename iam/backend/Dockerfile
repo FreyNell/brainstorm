@@ -9,4 +9,4 @@ COPY go.sum .
 
 RUN go build
 
-CMD [ ".\iam" ]
+CMD [ "./iam" ]

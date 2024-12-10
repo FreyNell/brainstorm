@@ -1,64 +1,51 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
-	"github.com/go-sql-driver/mysql"
+	"github.com/gin-gonic/gin"
 )
 
-func getUsers(db *sql.DB) ([]User, error) {
+func getAllUsersHandler(c *gin.Context) {
 	var users []User
 
-	rows, err := db.Query("SELECT id,name,username FROM users")
+	db, err := getDB()
 	if err != nil {
-		return nil, fmt.Errorf("users: %v", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var usr User
-		if err := rows.Scan(&usr.ID, &usr.Name, &usr.Username); err != nil {
-			return nil, fmt.Errorf("users: %v", err)
-		}
-		users = append(users, usr)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("users:", err)
+		log.Fatal(err)
 	}
 
-	return users, nil
+	users, err = getUsers(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Users found: %v\n", users)
+	c.IndentedJSON(http.StatusOK, users)
+}
+
+func getUsersByNameHandler(c *gin.Context) {
+	var users []User
+	db, err := getDB()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	users, err = getUserByName(db, "Sarah")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("User found: %v\n", users)
+	c.IndentedJSON(http.StatusOK, users)
 }
 
 func main() {
-	var db *sql.DB
+	router := gin.Default()
+	router.GET("/users", getAllUsersHandler)
 
-	cfg := mysql.Config{
-		User:   os.Getenv("DB_USER"),
-		Passwd: os.Getenv("DB_PASSWORD"),
-		Net:    "tcp",
-		Addr:   "db:3306",
-		DBName: "iam",
-	}
-
-	var err error
-	db, err = sql.Open("mysql", cfg.FormatDSN())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	pingErr := db.Ping()
-	if pingErr != nil {
-		log.Fatal(pingErr)
-	}
-	fmt.Println("Connected to db!")
-
-	users, err := getUsers(db)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("Users found: %v\n", users)
-
+	router.Run("0.0.0.0:" + os.Getenv("SERVERPORT"))
 }
