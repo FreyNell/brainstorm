@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -31,7 +30,6 @@ func getAllUsersHandler(c *gin.Context) {
 		}
 	}
 
-	fmt.Printf("Users found: %v\n", users)
 	c.IndentedJSON(http.StatusOK, users)
 }
 
