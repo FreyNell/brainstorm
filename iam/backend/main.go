@@ -16,30 +16,22 @@ func getAllUsersHandler(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
 
-	users, err = getUsers(db)
-	if err != nil {
-		log.Fatal(err)
+	name := c.Query("name")
+	if name != "" {
+		users, err = getUserByName(db, name)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		users, err = getUsers(db)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	fmt.Printf("Users found: %v\n", users)
-	c.IndentedJSON(http.StatusOK, users)
-}
-
-func getUsersByNameHandler(c *gin.Context) {
-	var users []User
-	db, err := getDB()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	users, err = getUserByName(db, "Sarah")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("User found: %v\n", users)
 	c.IndentedJSON(http.StatusOK, users)
 }
 

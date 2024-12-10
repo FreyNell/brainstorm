@@ -25,7 +25,6 @@ func getDB() (*sql.DB, error) {
 		log.Fatal(err)
 		return nil, err
 	}
-	defer db.Close()
 
 	pingErr := db.Ping()
 	if pingErr != nil {
